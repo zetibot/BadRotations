@@ -53,6 +53,13 @@ local function createToggles()
         [2] = { mode = "Off", value = 2 , overlay = "Best Cleave Target Disabled", tip = "Best Cleave Target Disabled", highlight = 0, icon = br.player.spell.misdirection }
     };
     CreateButton("BestCleave",0,1)
+
+    BWModes = {
+        [1] = { mode = "ON", value = 1 , overlay = "Use Bestial Wrath always", tip = "BW ALWAYS", highlight = 1, icon = br.player.spell.bestialWrath },
+        [2] = { mode = "CDS", value = 2 , overlay = "Use Besital Wrath on CD", tip = "BW CD Mode", highlight = 1, icon = br.player.spell.bestialWrath },
+        [3] = { mode = "OFF", value = 2 , overlay = "Do not use Bestial Wrath", tip = "BW OFF", highlight = 0, icon = br.player.spell.bestialWrath }
+    };
+    CreateButton("BW",1,1)
 end
 
 local function createOptions()
@@ -95,7 +102,7 @@ local function createOptions()
             -- Trinkets
             br.ui:createDropdownWithout(section, "Trinkets", {"|cff00FF001st Only","|cff00FF002nd Only","|cffFFFF00Both","|cffFF0000None"}, 1, "|cffFFFFFFSelect Trinket Usage.")
             -- Bestial Wrath
-            br.ui:createDropdownWithout(section,"Bestial Wrath", {"|cff00FF00Boss","|cffFFFF00Always"}, 1, "|cffFFFFFFSelect Bestial Wrath Usage.")
+            --br.ui:createDropdownWithout(section,"Bestial Wrath", {"|cff00FF00Boss","|cffFFFF00Always"}, 1, "|cffFFFFFFSelect Bestial Wrath Usage.")
             -- Trueshot
             br.ui:createCheckbox(section,"Aspect of the Wild")
         br.ui:checkSectionState(section)
@@ -502,9 +509,11 @@ local function runRotation()
     end
 
     local function ST()
-        if useCDs() and isChecked("Aspect of the Wild") and cd.aspectOfTheWild.remains() <= 2 then
+        if (useCDs() and isChecked("Aspect of the Wild") and cd.aspectOfTheWild.remains() <= 2) and ((not cast.able.bestialWrath() and (mode.bW == 1 or mode.bW == 2 and useCDs())) or mode.bW == 3) then
             if cast.barbedShot("target") then return end
         end
+
+        
         if not Barb1 and talent.killerCobra and buff.danceOfDeath.remains() < (gcdFixed + 2) and charges.barbedShot.frac() < 1.3 then
             if buff.bestialWrath.exists("player") then
                 if useCDs() then if cast.aspectOfTheWild() then return end end
@@ -515,22 +524,20 @@ local function runRotation()
             end
         end
 
+        if hunterTTD() and not buff.aspectOfTheWild.exists() and isChecked("Aspect of the Wild") and useCDs() and (charges.barbedShot.frac() <= 1.2 or not traits.primalInstincts.active) then
+            if cast.aspectOfTheWild() then return end
+        end
+
+        if hunterTTD() and (mode.bW == 1 or (mode.bW == 2 and useCDs())) and (buff.bestialWrath.remains() < gcdFixed) then
+            if cast.bestialWrath() then return end
+        end
+
 
         if Barb1 or ((buff.frenzy.exists("pet") and buff.frenzy.remains("pet") <= 2) or charges.barbedShot.frac() >= 1.3 or not buff.frenzy.exists("pet"))
         then
             if cast.barbedShot("target") then return end
         end
-
         
-
-        if hunterTTD() and not buff.aspectOfTheWild.exists() and isChecked("Aspect of the Wild") and useCDs() and (charges.barbedShot.frac() <= 1.2 or not traits.primalInstincts.active) then
-            if cast.aspectOfTheWild() then return end
-        end
-
-        if hunterTTD() and (getOptionValue("Bestial Wrath") == 2 or (getOptionValue("Bestial Wrath") == 1 and useCDs())) and (buff.bestialWrath.remains() < gcdFixed) then
-            if cast.bestialWrath() then return end
-        end
-
         if traits.danceOfDeath.rank > 1 and buff.danceOfDeath.remains() < (gcdFixed + 2) and charges.barbedShot.frac() >= 1.1 then
             if cast.barbedShot("target") then return end
         end
@@ -571,7 +578,7 @@ local function runRotation()
             if cast.aspectOfTheWild() then return end
         end
 
-        if hunterTTD() and (getOptionValue("Bestial Wrath") == 2 or (getOptionValue("Bestial Wrath") == 1 and useCDs())) and (buff.bestialWrath.remains() < gcdFixed) then
+        if hunterTTD() and (mode.bW == 1 or (mode.bW == 2 and useCDs())) and (buff.bestialWrath.remains() < gcdFixed) then
             if cast.bestialWrath() then return end
         end
 
