@@ -370,8 +370,7 @@ actionList.Interrupts = function()
 end -- End Action List - Interrupts
 -- Action List - Cooldowns
 actionList.Cooldowns = function()
-    local usableCD = useCDs() and getDistance("target") < 5 or false
-    if usableCD then
+    if useCDs() and getDistance("target") < 5 then
         -- Bloodlust/Heroism
         -- bloodlust,if=azerite.ancestral_resonance.enabled
         -- Heart Essence - Worldvein Resonance
@@ -406,13 +405,11 @@ actionList.Cooldowns = function()
         if option.checked("Use Essence") and cast.able.memoryOfLucidDreams() then
             if cast.memoryOfLucidDreams() then return true end
         end
-    end
-    -- Feral Spirit
-    -- feral_spirit
-    if cast.able.feralSpirit() and (option.value("Feral Spirit") == 1 or (option.value("Feral Spirit") == 2 and useCDs())) then
-        if cast.feralSpirit() then return true end
-    end
-    if usableCD then
+        -- Feral Spirit
+        -- feral_spirit
+        if cast.able.feralSpirit() and (option.value("Feral Spirit") == 1 or (option.value("Feral Spirit") == 2 and useCDs())) then
+            if cast.feralSpirit() then return true end
+        end
         -- Heart Essence - Blood of the Enemy
         -- blood_of_the_enemy
         if option.checked("Use Essence") and cast.able.bloodOfTheEnemy() then
@@ -437,6 +434,20 @@ actionList.Cooldowns = function()
             end
             if canUseItem(14) then
                 useItem(14)
+            end
+        end
+        -- Earth Elemental
+        -- earth_elemental
+        if option.checked("Earth Elemental") and cast.able.earthElemental() then
+            if cast.earthElemental() then return true end
+        end
+    end
+    if useCDs() and getDistance("target") < 5 then
+        -- Ascendance
+        -- ascendance,if=cooldown.strike.remains>0
+        if option.checked("Ascendance") and cast.able.ascendance() then
+            if cd.stormstrike.remain() > 0 then
+                if cast.ascendance() then return true end
             end
         end
         -- Earth Elemental
